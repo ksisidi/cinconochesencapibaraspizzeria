@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Five Nights at Capibara's</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+        }
+        
+        body {
+            background-color: #000;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        /* Menú Principal */
+        .main-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('file:///L:/capijuego/img/menu_background.png') no-repeat center center;
+            background-size: cover;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+        
+        .menu-title {
+            color: #8B4513;
+            font-size: 5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #A0522D, 0 0 40px #FF8C00;
+            letter-spacing: 5px;
+            animation: titleGlow 3s infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 20px #A0522D, 0 0 40px #FF8C00; }
+            100% { text-shadow: 0 0 30px #FF8C00, 0 0 60px #FF4500; }
+        }
+        
+        .menu-subtitle {
+            color: #aaa;
+            font-size: 1.5rem;
+            margin-bottom: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .menu-btn {
+            padding: 20px 60px;
+            background: linear-gradient(to bottom, #8B4513 0%, #A0522D 100%);
+            color: white;
+            border: 3px solid #FF8C00;
+            border-radius: 10px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            min-width: 300px;
+            text-align: center;
+        }
+        
+        .menu-btn:hover {
+            background: linear-gradient(to bottom, #A0522D 0%, #FF8C00 100%);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.7);
+        }
+        
+        .menu-instructions {
+            position: absolute;
+            bottom: 40px;
+            color: #666;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 80%;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        /* Contenedor del juego */
+        .game-container {
+            display: none;
+            flex-direction: column;
+            width: 1000px;
+            height: 750px;
+            background-color: #111;
+            border: 5px solid #8B4513;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(139, 69, 19, 0.5);
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #8B4513;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #A0522D;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .top-panel {
+            display: flex;
+            height: 70px;
+            background-color: #222;
+            border-bottom: 3px solid #8B4513;
+            padding: 10px 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .energy-bar {
+            width: 200px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #555;
+        }
+        
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(to right, #00cc00, #ffcc00, #ff0000);
+            width: 100%;
+            transition: width 0.3s;
+        }
+        
+        .time-display {
+            font-size: 1.8rem;
+            color: #A0522D;
+            font-weight: bold;
+            text-shadow: 0 0 5px #8B4513;
+        }
+        
+        .night-display {
+            font-size: 1.5rem;
+            color: #A0522D;
+            margin-left: 20px;
+        }
+        
+        .main-display {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+        
+        .office-view {
+            flex: 1;
+            background-color: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .camera-view {
+            flex: 1;
+            background-color: #000;
+            position: relative;
+            display: none;
+        }
+        
+        .camera-view.active {
+            display: block;
+        }
+        
+        .office-background {
+            width: 100%;
+            height: 100%;
+            background: url('file:///L:/capijuego/img/office_background.png') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            transition: filter 0.5s;
+        }
+        
+        .office-background.lights-off {
+            filter: brightness(0.3);
+        }
+        
+        .desk {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            background-color: transparent;
+        }
+        
+        .monitor {
+            position: absolute;
+            bottom: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
+            height: 220px;
+            background: url('file:///L:/capijuego/img/office_monitor.png') no-repeat center center;
+            background-size: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0f0;
+            font-size: 1.3rem;
+            text-align: center;
+            line-height: 1.5;
+            padding: 15px;
+            z-index: 2;
+        }
+        
+        .monitor-text {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .monitor.off .monitor-text {
+            color: #333;
+        }
+        
+        /* Puertas */
+        .doors {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+        
+        .door {
+            width: 140px;
+            height: 280px;
+            background: url('file:///L:/capijuego/img/door.png') no-repeat center center;
+            background-size: contain;
+            position: relative;
+            transition: filter 0.3s;
+        }
+        
+        .door.active {
+            filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5);
+        }
+        
+        .door-control {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 20px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 2;
+            font-size: 0.9rem;
+        }
+        
+        /* Capibara en oficina */
+        .capibara-office {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: url('file:///L:/capijuego/img/capibara_office.png') no-repeat center center;
+            background-size: contain;
+            display: none;
+            z-index: 5;
+            transition: left 0.3s, transform 0.3s;
+        }
+        
+        .capibara-office.show {
+            display: block;
+        }
+        
+        .capibara-office.peeking {
+            animation: peek 0.5s infinite alternate;
+        }
+        
+        @keyframes peek {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+        
+        /* Cámara - Vistas con imágenes */
+        .camera-monitor {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .camera-feed-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .camera-scene {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            position: relative;
+        }
+        
+        /* Capibara en cámara */
+        .capibara-camera {
+            position: absolute;
+            width: 80px;
+            height: 50px;
+            background: url('file:///L:/capijuego/img/capibara_side.png') no-repeat center center;
+            background-size: contain;
+            display: none;
+            z-index: 10;
+        }
+        
+        .capibara-camera.show {
+            display: block;
+        }
+        
+        .camera-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #0f0;
+            z-index: 10;
+        }
+        
+        .camera-list {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .camera-btn {
+            padding: 8px 12px;
+            background-color: rgba(50, 50, 50, 0.8);
+            color: white;
+            border: 1px solid #666;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .camera-btn.active {
+            background-color: #8B4513;
+            border-color: #A0522D;
+        }
+        
+        .hall-lights {
+            position: absolute;
+            width: 120px;
+            height: 90px;
+            background-color: transparent;
+            display: none;
+        }
+        
+        .hall-lights.on {
+            display: block;
+            background: radial-gradient(circle, rgba(255,255,200,0.8) 0%, rgba(255,255,200,0) 70%);
+        }
+        
+        .left-light {
+            left: 0;
+            top: 250px;
+        }
+        
+        .right-light {
+            right: 0;
+            top: 250px;
+        }
+        
+        .controls-panel {
+            display: flex;
+            height: 80px;
+            background-color: #222;
+            border-top: 2px solid #444;
+            padding: 15px;
+            justify-content: center;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .control-button {
+            padding: 12px 24px;
+            background-color: #333;
+            color: white;
+            border: 2px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        
+        .control-button:hover {
+            background-color: #444;
+        }
+        
+        .control-button.active {
+            background-color: #8B4513;
+            border-color: #A0522D;
+        }
+        
+        .instructions {
+            width: 1000px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #222;
+            border-radius: 5px;
+            line-height: 1.6;
+            border-left: 4px solid #8B4513;
+        }
+        
+        .instructions h3 {
+            color: #A0522D;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .key {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #333;
+            color: white;
+            border-radius: 3px;
+            font-family: monospace;
+            margin: 0 3px;
+        }
+        
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .game-over h2 {
+            font-size: 3rem;
+            color: #cc0000;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+        
+        .game-over button {
+            padding: 15px 30px;
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .game-over button:hover {
+            background-color: #A0522D;
+        }
+        
+        .jumpscare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('file:///L:/capijuego/img/jumpscare.png') no-repeat center center;
+            background-size: cover;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .jumpscare h2 {
+            font-size: 4rem;
+            color: white;
+            text-shadow: 0 0 10px black;
+            margin-top: 400px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .sound-control {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .sound-toggle {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            background-color: #555;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .sound-toggle.on {
+            background-color: #8B4513;
+        }
+        
+        .energy-out-sequence {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .energy-out-sequence.active {
+            display: flex;
+        }
+        
+        .energy-out-message {
+            font-size: 2rem;
+            color: #ff4444;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px #ff0000;
+            animation: flicker 2s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .sleeping-capibara {
+            width: 150px;
+            height: 90px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .sleeping-capibara .capibara-office {
+            width: 150px;
+            height: 90px;
+            filter: brightness(0.8);
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-top: 20px;
+        }
+        
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú Principal -->
+    <div class="main-menu" id="mainMenu">
+        <div class="menu-title">FIVE NIGHTS AT CAPIBARA'S</div>
+        <div class="menu-subtitle">La aventura más aterradora comienza...</div>
+        
+        <div class="menu-options">
+            <button class="menu-btn" id="startNight1">NOCHE 1</button>
+            <button class="menu-btn" id="startNight2">NOCHE 2</button>
+            <button class="menu-btn" id="startNight3">NOCHE 3</button>
+            <button class="menu-btn" id="instructionsBtn">INSTRUCCIONES</button>
+        </div>
+        
+        <div class="menu-instructions">
+            Usa las cámaras para vigilar al capibara. Cierra las puertas cuando se acerque.<br>
+            Administra tu energía cuidadosamente. ¡Sobrevive hasta las 6:00 AM!
+        </div>
+    </div>
+    
+    <!-- Contenedor del juego -->
+    <div class="game-container" id="gameContainer">
+        <div class="top-panel">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">ENERGÍA</div>
+                    <div class="energy-bar">
+                        <div class="energy-fill" id="energyFill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">PUERTAS</div>
+                    <div class="stat-value" id="doorsStatus">ABIERTAS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">CÁMARA</div>
+                    <div class="stat-value" id="cameraStatus">OFF</div>
+                </div>
+            </div>
+            
+            <div class="time-display" id="timeDisplay">12:00 AM</div>
+            
+            <div class="night-display" id="nightDisplay">NOCHE 1</div>
+        </div>
+        
+        <div class="main-display">
+            <!-- Vista de oficina -->
+            <div class="office-view" id="officeView">
+                <div class="office-background" id="officeBackground">
+                    <div class="desk"></div>
+                    <div class="monitor" id="officeMonitor">
+                        <div class="monitor-text" id="monitorText">
+                            SISTEMA DE CÁMARAS<br>DESACTIVADO
+                        </div>
+                    </div>
+                    
+                    <!-- Luces de pasillo -->
+                    <div class="hall-lights left-light" id="leftLight"></div>
+                    <div class="hall-lights right-light" id="rightLight"></div>
+                    
+                    <!-- Puertas -->
+                    <div class="doors">
+                        <div class="door" id="leftDoor">
+                            <button class="door-control" id="leftDoorBtn">PUERTA IZQ (Q)</button>
+                        </div>
+                        <div class="door" id="rightDoor">
+                            <button class="door-control" id="rightDoorBtn">PUERTA DER (E)</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Capibara en oficina -->
+                    <div class="capibara-office" id="capibaraOffice"></div>
+                </div>
+            </div>
+            
+            <!-- Vista de cámara -->
+            <div class="camera-view" id="cameraView">
+                <div class="camera-monitor">
+                    <div class="camera-feed" id="cameraFeed">
+                        <!-- Contenido dinámico de las cámaras -->
+                    </div>
+                    <div class="camera-info" id="cameraInfo">
+                        CÁMARA 1: ESCENARIO
+                    </div>
+                    <div class="camera-list">
+                        <button class="camera-btn" data-camera="1">CÁM 1 - ESCENARIO (1)</button>
+                        <button class="camera-btn" data-camera="2">CÁM 2 - PASILLO IZQ (2)</button>
+                        <button class="camera-btn" data-camera="3">CÁM 3 - PASILLO DER (3)</button>
+                        <button class="camera-btn" data-camera="4">CÁM 4 - COCINA (4)</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Secuencia de energía agotada -->
+            <div class="energy-out-sequence" id="energyOutSequence">
+                <div class="energy-out-message" id="energyOutMessage">
+                    ¡ENERGÍA AGOTADA!
+                </div>
+                <div class="sleeping-capibara">
+                    <div class="capibara-office" id="sleepingCapibara"></div>
+                </div>
+                <div class="countdown" id="countdown">
+                    El capibara se acerca... 10
+                </div>
+            </div>
+        </div>
+        
+        <!-- Panel de controles -->
+        <div class="controls-panel">
+            <button class="control-button" id="cameraBtn">CÁMARAS (C)</button>
+            <button class="control-button" id="lightsBtn">LUCES (F)</button>
+        </div>
+        
+        <!-- Control de sonido -->
+        <div class="sound-control">
+            <span>SONIDO:</span>
+            <div class="sound-toggle on" id="soundToggle">ON</div>
+        </div>
+        
+        <!-- Jumpscare -->
+        <div class="jumpscare" id="jumpscare">
+            <h2>¡EL CAPIBARA TE ATRAPÓ!</h2>
+        </div>
+        
+        <!-- Game Over -->
+        <div class="game-over" id="gameOverScreen">
+            <h2>GAME OVER</h2>
+            <p id="gameOverMessage">Te quedaste sin energía y el capibara te atrapó.</p>
+            <button id="restartButton">REINICIAR NOCHE</button>
+        </div>
+    </div>
+    
+    <!-- Instrucciones -->
+    <div class="instructions" style="display: none;" id="gameInstructions">
+        <h3>INSTRUCCIONES DE JUEGO</h3>
+        <ul>
+            <li><span class="key">C</span> - Activar/Desactivar cámaras (consume energía)</li>
+            <li><span class="key">1-4</span> - Cambiar entre cámaras (solo cuando las cámaras están activas)</li>
+            <li><span class="key">Q</span> - Cerrar/Abrir puerta izquierda (consume energía cuando está cerrada)</li>
+            <li><span class="key">E</span> - Cerrar/Abrir puerta derecha (consume energía cuando está cerrada)</li>
+            <li><span class="key">F</span> - Encender/Apagar luces de pasillo (consume energía, revela al capibara)</li>
+            <li><span class="key">ESPACIO</span> - Intentar reiniciar sistemas (cuando se acaba la energía)</li>
+            <li>OBJETIVO: Sobrevivir hasta las 6:00 AM sin quedarte sin energía y evitando que el capibara entre.</li>
+        </ul>
+        <button class="menu-btn" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem;" id="backToMenu">VOLVER AL MENÚ</button>
+    </div>
+
+    <!-- Elementos de audio ocultos -->
+    <audio id="soundClick" preload="auto">
+        <source src="file:///L:/capijuego/sounds/click.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundCamera" preload="auto">
+        <source src="file:///L:/capijuego/sounds/camera.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundDoor" preload="auto">
+        <source src="file:///L:/capijuego/sounds/door.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundJumpscare" preload="auto">
+        <source src="file:///L:/capijuego/sounds/jumpscare.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundLight" preload="auto">
+        <source src="file:///L:/capijuego/sounds/light.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundLowEnergy" preload="auto">
+        <source src="file:///L:/capijuego/sounds/lowEnergy.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundMove" preload="auto">
+        <source src="file:///L:/capijuego/sounds/move.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="soundStatic" preload="auto">
+        <source src="file:///L:/capijuego/sounds/static.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Variables del juego
+        let energy = 100;
+        let time = 0;
+        let gameActive = false;
+        let camerasActive = false;
+        let leftDoorClosed = false;
+        let rightDoorClosed = false;
+        let lightsOn = false;
+        let currentCamera = 1;
+        let soundEnabled = true;
+        let energyOutSequenceActive = false;
+        let energyOutTimer = 10;
+        let energyOutInterval;
+        let currentNight = 1;
+        let capibaraPeeking = false;
+        let capibaraPeekTimer = 0;
+        
+        // Configuración por noche
+        const nightSettings = {
+            1: { movementChance: 0.03, energyDrain: 0.8, capibaraSpeed: 1.0 },
+            2: { movementChance: 0.05, energyDrain: 0.9, capibaraSpeed: 1.3 },
+            3: { movementChance: 0.08, energyDrain: 1.0, capibaraSpeed: 1.6 }
+        };
+        
+        // Estado del capibara
+        let capibara = { 
+            location: "stage",
+            movementChance: 0.03,
+            energyDrain: 0.8,
+            speed: 1.0,
+            lastMovement: 0,
+            isPeeking: false
+        };
+        
+        // Referencias a elementos del DOM
+        const mainMenu = document.getElementById('mainMenu');
+        const gameContainer = document.getElementById('gameContainer');
+        const gameInstructions = document.getElementById('gameInstructions');
+        const energyFill = document.getElementById('energyFill');
+        const doorsStatus = document.getElementById('doorsStatus');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const nightDisplay = document.getElementById('nightDisplay');
+        const officeView = document.getElementById('officeView');
+        const cameraView = document.getElementById('cameraView');
+        const officeMonitor = document.getElementById('officeMonitor');
+        const monitorText = document.getElementById('monitorText');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const jumpscareScreen = document.getElementById('jumpscare');
+        const restartButton = document.getElementById('restartButton');
+        const officeBackground = document.getElementById('officeBackground');
+        const leftLight = document.getElementById('leftLight');
+        const rightLight = document.getElementById('rightLight');
+        const cameraFeed = document.getElementById('cameraFeed');
+        const cameraInfo = document.getElementById('cameraInfo');
+        const soundToggle = document.getElementById('soundToggle');
+        const energyOutSequence = document.getElementById('energyOutSequence');
+        const energyOutMessage = document.getElementById('energyOutMessage');
+        const countdown = document.getElementById('countdown');
+        const capibaraOffice = document.getElementById('capibaraOffice');
+        const sleepingCapibara = document.getElementById('sleepingCapibara');
+        
+        // Elementos de audio
+        const soundClick = document.getElementById('soundClick');
+        const soundCamera = document.getElementById('soundCamera');
+        const soundDoor = document.getElementById('soundDoor');
+        const soundJumpscare = document.getElementById('soundJumpscare');
+        const soundLight = document.getElementById('soundLight');
+        const soundLowEnergy = document.getElementById('soundLowEnergy');
+        const soundMove = document.getElementById('soundMove');
+        const soundStatic = document.getElementById('soundStatic');
+        
+        // Botones del menú
+        const startNight1 = document.getElementById('startNight1');
+        const startNight2 = document.getElementById('startNight2');
+        const startNight3 = document.getElementById('startNight3');
+        const instructionsBtn = document.getElementById('instructionsBtn');
+        const backToMenu = document.getElementById('backToMenu');
+        
+        // Botones del juego
+        const cameraBtn = document.getElementById('cameraBtn');
+        const lightsBtn = document.getElementById('lightsBtn');
+        const leftDoorBtn = document.getElementById('leftDoorBtn');
+        const rightDoorBtn = document.getElementById('rightDoorBtn');
+        const leftDoor = document.getElementById('leftDoor');
+        const rightDoor = document.getElementById('rightDoor');
+        const cameraBtns = document.querySelectorAll('.camera-btn');
+        
+        // Inicializar audio
+        function initAudio() {
+            // Precargar todos los sonidos
+            const sounds = [soundClick, soundCamera, soundDoor, soundJumpscare, soundLight, soundLowEnergy, soundMove, soundStatic];
+            
+            sounds.forEach(sound => {
+                sound.volume = 0.7;
+                sound.load();
+            });
+            
+            // Configurar volumen específico
+            soundJumpscare.volume = 1.0;
+            soundStatic.volume = 0.4;
+        }
+        
+        // Función para reproducir sonido
+        function playSound(soundElement) {
+            if (!soundEnabled) return;
+            
+            soundElement.currentTime = 0;
+            soundElement.play().catch(e => console.log("Error reproduciendo sonido:", e));
+        }
+        
+        // Actualizar UI
+        function updateUI() {
+            // Actualizar energía
+            energyFill.style.width = `${energy}%`;
+            
+            // Actualizar puertas
+            const leftStatus = leftDoorClosed ? "CERRADA" : "ABIERTA";
+            const rightStatus = rightDoorClosed ? "CERRADA" : "ABIERTA";
+            doorsStatus.textContent = `${leftStatus} | ${rightStatus}`;
+            
+            // Actualizar cámara
+            cameraStatus.textContent = camerasActive ? `CÁM ${currentCamera}` : "OFF";
+            
+            // Actualizar tiempo
+            const hours = Math.floor(time / 60);
+            const minutes = time % 60;
+            const hourDisplay = (hours % 12) || 12;
+            const ampm = hours < 6 ? "AM" : "PM";
+            timeDisplay.textContent = `${hourDisplay.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+            
+            // Actualizar monitor
+            if (energy <= 0) {
+                monitorText.textContent = "SISTEMA SIN ENERGÍA\nREINICIANDO...";
+                officeMonitor.classList.add('off');
+            } else {
+                monitorText.textContent = camerasActive 
+                    ? `CÁMARA ${currentCamera} ACTIVA\nVIGILANDO...` 
+                    : "SISTEMA DE CÁMARAS\nDESACTIVADO";
+                officeMonitor.classList.remove('off');
+            }
+            
+            // Actualizar estado visual de puertas
+            leftDoor.classList.toggle('active', leftDoorClosed);
+            rightDoor.classList.toggle('active', rightDoorClosed);
+            leftDoorBtn.textContent = `PUERTA IZQ (Q): ${leftDoorClosed ? 'ABRIR' : 'CERRAR'}`;
+            rightDoorBtn.textContent = `PUERTA DER (E): ${rightDoorClosed ? 'ABRIR' : 'CERRAR'}`;
+            
+            // Actualizar luces
+            cameraBtn.classList.toggle('active', camerasActive);
+            lightsBtn.classList.toggle('active', lightsOn);
+            officeBackground.classList.toggle('lights-off', energy <= 0 || !lightsOn);
+            
+            // Actualizar luces de pasillo
+            if (lightsOn && (capibara.location === "hall_left" || capibara.location === "door_left")) {
+                leftLight.classList.add('on');
+            } else {
+                leftLight.classList.remove('on');
+            }
+            
+            if (lightsOn && (capibara.location === "hall_right" || capibara.location === "door_right")) {
+                rightLight.classList.add('on');
+            } else {
+                rightLight.classList.remove('on');
+            }
+            
+            // Actualizar posición del capibara en oficina
+            updateCapibaraPosition();
+            
+            // Actualizar vista de cámara si está activa
+            if (camerasActive && energy > 0) {
+                updateCameraView();
+            }
+            
+            // Mostrar capibara asomándose
+            if (capibara.isPeeking) {
+                capibaraOffice.classList.add('peeking');
+            } else {
+                capibaraOffice.classList.remove('peeking');
+            }
+            
+            // Sonido de energía baja
+            if (energy < 30 && energy > 0 && Math.random() < 0.1) {
+                playSound(soundLowEnergy);
+            }
+        }
+        
+        // Actualizar posición del capibara en oficina
+        function updateCapibaraPosition() {
+            const showCapibara = (capibara.location === "door_left" || capibara.location === "door_right") && lightsOn;
+            
+            if (showCapibara) {
+                capibaraOffice.classList.add('show');
+                
+                if (capibara.location === "door_left") {
+                    capibaraOffice.style.left = "140px";
+                    capibaraOffice.style.bottom = "280px";
+                } else {
+                    capibaraOffice.style.left = "740px";
+                    capibaraOffice.style.bottom = "280px";
+                }
+            } else {
+                capibaraOffice.classList.remove('show');
+            }
+        }
+        
+        // Actualizar vista de cámara con imágenes
+        function updateCameraView() {
+            let cameraHTML = '';
+            let cameraImage = '';
+            
+            // Determinar imagen de cámara según la cámara actual
+            switch(currentCamera) {
+                case 1: // Escenario
+                    cameraImage = 'file:///L:/capijuego/img/camera1_stage.png';
+                    break;
+                case 2: // Pasillo izquierdo
+                    cameraImage = 'file:///L:/capijuego/img/camera2_hall_left.png';
+                    break;
+                case 3: // Pasillo derecho
+                    cameraImage = 'file:///L:/capijuego/img/camera3_hall_right.png';
+                    break;
+                case 4: // Cocina
+                    cameraImage = 'file:///L:/capijuego/img/camera4_kitchen.png';
+                    break;
+            }
+            
+            // Crear HTML de la cámara con imagen de fondo
+            cameraHTML = `
+                <div class="camera-feed-content">
+                    <div class="camera-scene" style="background-image: url('${cameraImage}');">
+            `;
+            
+            // Añadir capibara si está visible en esta cámara
+            if ((currentCamera === 1 && capibara.location === "stage") ||
+                (currentCamera === 2 && (capibara.location === "hall_left" || capibara.location === "door_left")) ||
+                (currentCamera === 3 && (capibara.location === "hall_right" || capibara.location === "door_right"))) {
+                
+                let capibaraStyle = '';
+                let warningText = '';
+                let warningColor = '#ffcc00';
+                
+                if (currentCamera === 1) {
+                    capibaraStyle = 'left: 45%; bottom: 40%;';
+                    warningText = '⚠ CAPIBARA EN ESCENARIO ⚠';
+                } else if (currentCamera === 2) {
+                    capibaraStyle = capibara.location === "hall_left" ? 'left: 30%; bottom: 30%;' : 'left: 70%; bottom: 30%;';
+                    warningText = capibara.location === "door_left" ? '¡¡CAPIBARA EN LA PUERTA!!' : '⚠ CAPIBARA EN PASILLO IZQ ⚠';
+                    warningColor = capibara.location === "door_left" ? '#ff0000' : '#ffcc00';
+                } else if (currentCamera === 3) {
+                    capibaraStyle = capibara.location === "hall_right" ? 'left: 70%; bottom: 30%;' : 'left: 30%; bottom: 30%;';
+                    warningText = capibara.location === "door_right" ? '¡¡CAPIBARA EN LA PUERTA!!' : '⚠ CAPIBARA EN PASILLO DER ⚠';
+                    warningColor = capibara.location === "door_right" ? '#ff0000' : '#ffcc00';
+                }
+                
+                cameraHTML += `<div class="capibara-camera show" style="${capibaraStyle}"></div>`;
+                
+                // Añadir texto de advertencia
+                cameraHTML += `
+                    <div style="position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); 
+                                color: ${warningColor}; font-size: 1.5rem; text-shadow: 0 0 10px #000;
+                                background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px;
+                                border: 3px solid ${warningColor}; text-align: center; animation: pulse 1s infinite;">
+                        ${warningText}
+                    </div>
+                `;
+            } else if (currentCamera === 4) {
+                // Mensaje para cocina
+                cameraHTML += `
+                    <div style="position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); 
+                                color: #0f0; font-size: 1.5rem; text-shadow: 0 0 10px #000;
+                                background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px;
+                                text-align: center;">
+                        COCINA VACÍA - ÁREA SEGURA
+                    </div>
+                `;
+            }
+            
+            cameraHTML += `
+                    </div>
+                </div>
+            `;
+            
+            cameraFeed.innerHTML = cameraHTML;
+            cameraInfo.textContent = `CÁMARA ${currentCamera}: ${getCameraName(currentCamera)}`;
+            
+            // Actualizar botones de cámara activos
+            cameraBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.camera) === currentCamera) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Sonido de estática al cambiar de cámara
+            if (Date.now() - lastCameraChange < 200) {
+                playSound(soundStatic);
+            }
+        }
+        
+        function getCameraName(camNum) {
+            switch(camNum) {
+                case 1: return "ESCENARIO";
+                case 2: return "PASILLO IZQUIERDO";
+                case 3: return "PASILLO DERECHO";
+                case 4: return "COCINA";
+                default: return "DESCONOCIDA";
+            }
+        }
+        
+        // Consumir energía
+        function consumeEnergy(amount) {
+            if (!gameActive || energyOutSequenceActive) return;
+            
+            energy = Math.max(0, energy - amount * capibara.energyDrain);
+            
+            if (energy <= 0) {
+                energy = 0;
+                startEnergyOutSequence();
+            }
+            
+            updateUI();
+        }
+        
+        // Mover el capibara
+        function moveCapibara() {
+            if (!gameActive || energyOutSequenceActive) return;
+            
+            // Probabilidad de movimiento ajustada por noche
+            const moveProbability = capibara.movementChance * (1 + time / 360);
+            
+            if (Math.random() < moveProbability) {
+                const locations = ["stage", "hall_left", "hall_right", "door_left", "door_right"];
+                const currentIndex = locations.indexOf(capibara.location);
+                
+                // El capibara se mueve
+                if (currentIndex < locations.length - 1) {
+                    // 70% avanzar, 30% retroceder o quedarse
+                    if (Math.random() < 0.7) {
+                        let nextIndex = currentIndex + 1;
+                        
+                        // Desde el stage, elegir pasillo aleatorio
+                        if (locations[currentIndex] === "stage") {
+                            nextIndex = Math.random() < 0.5 ? 1 : 2;
+                        }
+                        
+                        capibara.location = locations[nextIndex];
+                        capibara.lastMovement = Date.now();
+                        playSound(soundMove);
+                        
+                        // Si llegó a una puerta, empezar a asomarse
+                        if (capibara.location.includes("door")) {
+                            startPeeking();
+                        }
+                    } else if (currentIndex > 0 && Math.random() < 0.3) {
+                        // Retroceder
+                        capibara.location = locations[currentIndex - 1];
+                        capibara.lastMovement = Date.now();
+                        playSound(soundMove);
+                        capibara.isPeeking = false;
+                    }
+                    
+                    // Verificar si está en la puerta
+                    if (capibara.location === "door_left" || capibara.location === "door_right") {
+                        checkCapibaraAtDoor();
+                    }
+                    
+                    updateUI();
+                }
+            }
+            
+            // Manejar asomo del capibara
+            if (capibara.isPeeking && Date.now() - capibaraPeekTimer > 1000) {
+                capibara.isPeeking = !capibara.isPeeking;
+                capibaraPeekTimer = Date.now();
+                updateUI();
+            }
+        }
+        
+        // Empezar asomo del capibara
+        function startPeeking() {
+            capibara.isPeeking = true;
+            capibaraPeekTimer = Date.now();
+        }
+        
+        // Verificar capibara en puerta
+        function checkCapibaraAtDoor() {
+            const doorClosed = capibara.location === "door_left" ? leftDoorClosed : rightDoorClosed;
+            
+            // Si la puerta está abierta, jumpscare después de un tiempo
+            if (!doorClosed) {
+                // El capibara se asoma por 3 segundos antes de atacar
+                setTimeout(() => {
+                    if (!doorClosed && gameActive) {
+                        jumpscare();
+                    }
+                }, 3000);
+            } else {
+                // Si la puerta está cerrada, consume energía extra
+                consumeEnergy(3);
+            }
+        }
+        
+        // Iniciar secuencia de energía agotada
+        function startEnergyOutSequence() {
+            gameActive = false;
+            energyOutSequenceActive = true;
+            
+            // Apagar sistemas
+            lightsOn = false;
+            camerasActive = false;
+            cameraView.classList.remove('active');
+            
+            // Mostrar secuencia
+            energyOutSequence.classList.add('active');
+            energyOutMessage.textContent = "¡ENERGÍA AGOTADA!";
+            
+            // Posicionar capibara durmiendo
+            sleepingCapibara.style.left = "50%";
+            sleepingCapibara.style.bottom = "50%";
+            sleepingCapibara.style.transform = "translate(-50%, 50%)";
+            
+            // Iniciar cuenta regresiva
+            energyOutTimer = 10;
+            countdown.textContent = `El capibara se acerca... ${energyOutTimer}`;
+            
+            energyOutInterval = setInterval(() => {
+                energyOutTimer--;
+                countdown.textContent = `El capibara se acerca... ${energyOutTimer}`;
+                
+                if (energyOutTimer <= 0) {
+                    clearInterval(energyOutInterval);
+                    triggerEnergyOutJumpscare();
+                }
+            }, 1000);
+            
+            updateUI();
+        }
+        
+        // Activar jumpscare por energía
+        function triggerEnergyOutJumpscare() {
+            energyOutSequence.classList.remove('active');
+            showJumpscare("ENERGÍA");
+        }
+        
+        // Mostrar jumpscare
+        function jumpscare() {
+            gameActive = false;
+            energyOutSequenceActive = false;
+            
+            if (energyOutInterval) {
+                clearInterval(energyOutInterval);
+            }
+            
+            energyOutSequence.classList.remove('active');
+            showJumpscare("CAPIBARA");
+        }
+        
+        function showJumpscare(reason) {
+            playSound(soundJumpscare);
+            jumpscareScreen.style.display = "flex";
+            
+            setTimeout(() => {
+                jumpscareScreen.style.display = "none";
+                gameOver(reason);
+            }, 3000);
+        }
+        
+        // Game over
+        function gameOver(reason) {
+            gameActive = false;
+            
+            let message = "";
+            if (reason === "ENERGÍA") {
+                message = "Te quedaste sin energía y el capibara te atrapó.";
+            } else if (reason === "TIME") {
+                message = "¡Felicidades! Has sobrevivido hasta las 6:00 AM.";
+            } else {
+                message = "El capibara entró por la puerta abierta y te atrapó.";
+            }
+            
+            gameOverMessage.textContent = message;
+            gameOverScreen.style.display = "flex";
+        }
+        
+        // Reiniciar juego
+        function restartGame() {
+            // Reiniciar variables
+            energy = 100;
+            time = 0;
+            gameActive = true;
+            camerasActive = false;
+            leftDoorClosed = false;
+            rightDoorClosed = false;
+            lightsOn = false;
+            currentCamera = 1;
+            energyOutSequenceActive = false;
+            energyOutTimer = 10;
+            capibara.isPeeking = false;
+            
+            // Reiniciar capibara
+            capibara.location = "stage";
+            capibara.lastMovement = 0;
+            
+            // Aplicar configuración de noche
+            const settings = nightSettings[currentNight];
+            capibara.movementChance = settings.movementChance;
+            capibara.energyDrain = settings.energyDrain;
+            capibara.speed = settings.speed;
+            
+            // Limpiar vistas
+            cameraView.classList.remove('active');
+            energyOutSequence.classList.remove('active');
+            jumpscareScreen.style.display = "none";
+            gameOverScreen.style.display = "none";
+            
+            // Limpiar intervalos
+            if (energyOutInterval) {
+                clearInterval(energyOutInterval);
+            }
+            
+            updateUI();
+        }
+        
+        // Iniciar noche
+        function startNight(nightNumber) {
+            currentNight = nightNumber;
+            nightDisplay.textContent = `NOCHE ${nightNumber}`;
+            
+            mainMenu.style.display = "none";
+            gameContainer.style.display = "flex";
+            gameInstructions.style.display = "none";
+            
+            restartGame();
+        }
+        
+        // Intentar reiniciar sistemas
+        function tryRestartSystems() {
+            if (!energyOutSequenceActive || energy > 0) return;
+            
+            if (Math.random() < 0.15) {
+                // Éxito
+                energy = 20;
+                gameActive = true;
+                energyOutSequenceActive = false;
+                
+                if (energyOutInterval) {
+                    clearInterval(energyOutInterval);
+                }
+                
+                energyOutSequence.classList.remove('active');
+                updateUI();
+                
+                playSound(soundCamera);
+            } else {
+                // Fallo
+                energyOutMessage.textContent = "REINICIO FALLIDO";
+                setTimeout(() => {
+                    energyOutMessage.textContent = "¡ENERGÍA AGOTADA!";
+                }, 1000);
+            }
+        }
+        
+        // Avanzar tiempo
+        function advanceTime() {
+            if (!gameActive || energyOutSequenceActive) return;
+            
+            time += 1;
+            
+            // Consumo base
+            consumeEnergy(0.05);
+            
+            // Consumo por sistemas
+            if (camerasActive) consumeEnergy(0.1);
+            if (leftDoorClosed) consumeEnergy(0.2);
+            if (rightDoorClosed) consumeEnergy(0.2);
+            if (lightsOn) consumeEnergy(0.15);
+            
+            // Mover capibara
+            moveCapibara();
+            
+            // Verificar fin de noche (6:00 AM = 360 minutos)
+            if (time >= 360) {
+                gameOver("TIME");
+            }
+            
+            updateUI();
+        }
+        
+        let lastCameraChange = 0;
+        
+        // Configurar controles
+        function setupControls() {
+            // Menú
+            startNight1.addEventListener('click', () => startNight(1));
+            startNight2.addEventListener('click', () => startNight(2));
+            startNight3.addEventListener('click', () => startNight(3));
+            instructionsBtn.addEventListener('click', () => {
+                mainMenu.style.display = "none";
+                gameInstructions.style.display = "block";
+            });
+            backToMenu.addEventListener('click', () => {
+                gameInstructions.style.display = "none";
+                mainMenu.style.display = "flex";
+            });
+            
+            // Teclado del juego
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ') e.preventDefault();
+                
+                if (!gameActive) return;
+                
+                const key = e.key.toLowerCase();
+                
+                // Reiniciar sistemas
+                if (key === ' ' && energyOutSequenceActive) {
+                    tryRestartSystems();
+                    return;
+                }
+                
+                // Cámaras
+                if (key === 'c' && energy > 0) {
+                    toggleCameras();
+                }
+                
+                // Cambiar cámaras
+                if (key >= '1' && key <= '4' && camerasActive && energy > 0) {
+                    switchCamera(parseInt(key));
+                }
+                
+                // Puertas
+                if (key === 'q' && energy > 0) {
+                    toggleLeftDoor();
+                }
+                if (key === 'e' && energy > 0) {
+                    toggleRightDoor();
+                }
+                
+                // Luces
+                if (key === 'f' && energy > 0) {
+                    toggleLights();
+                }
+            });
+            
+            // Botones del juego
+            cameraBtn.addEventListener('click', () => {
+                if (!gameActive || energy <= 0) return;
+                toggleCameras();
+            });
+            
+            lightsBtn.addEventListener('click', () => {
+                if (!gameActive || energy <= 0) return;
+                toggleLights();
+            });
+            
+            leftDoorBtn.addEventListener('click', () => {
+                if (!gameActive || energy <= 0) return;
+                toggleLeftDoor();
+            });
+            
+            rightDoorBtn.addEventListener('click', () => {
+                if (!gameActive || energy <= 0) return;
+                toggleRightDoor();
+            });
+            
+            cameraBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!gameActive || !camerasActive || energy <= 0) return;
+                    switchCamera(parseInt(btn.dataset.camera));
+                });
+            });
+            
+            restartButton.addEventListener('click', restartGame);
+            
+            soundToggle.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                soundToggle.classList.toggle('on', soundEnabled);
+                soundToggle.textContent = soundEnabled ? 'ON' : 'OFF';
+            });
+        }
+        
+        // Funciones de controles
+        function toggleCameras() {
+            playSound(soundCamera);
+            playSound(soundStatic);
+            camerasActive = !camerasActive;
+            
+            if (camerasActive) {
+                cameraView.classList.add('active');
+                updateCameraView();
+                consumeEnergy(1);
+            } else {
+                cameraView.classList.remove('active');
+            }
+            
+            updateUI();
+        }
+        
+        function switchCamera(camNumber) {
+            if (camNumber === currentCamera) return;
+            
+            playSound(soundClick);
+            playSound(soundStatic);
+            lastCameraChange = Date.now();
+            
+            currentCamera = camNumber;
+            consumeEnergy(0.5);
+            updateUI();
+        }
+        
+        function toggleLeftDoor() {
+            playSound(soundDoor);
+            leftDoorClosed = !leftDoorClosed;
+            consumeEnergy(0.5);
+            updateUI();
+        }
+        
+        function toggleRightDoor() {
+            playSound(soundDoor);
+            rightDoorClosed = !rightDoorClosed;
+            consumeEnergy(0.5);
+            updateUI();
+        }
+        
+        function toggleLights() {
+            playSound(soundLight);
+            lightsOn = !lightsOn;
+            consumeEnergy(0.5);
+            updateUI();
+        }
+        
+        // Inicializar juego
+        function initGame() {
+            initAudio();
+            setupControls();
+            
+            // Configurar temporizador (4 minutos reales = 240 segundos)
+            setInterval(advanceTime, 666); // 0.666 segundos por minuto de juego
+            
+            console.log("Five Nights at Capibara's - Juego Inicializado");
+            console.log("Controles: C (cámaras), 1-4 (cambiar cámara), Q/E (puertas), F (luces), ESPACIO (reiniciar sistemas)");
+        }
+        
+        // Iniciar al cargar
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
